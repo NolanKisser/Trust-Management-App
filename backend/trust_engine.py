@@ -7,14 +7,14 @@ class TrustModelPipeline:
     def __init__(self):
         self.model = None
         self.scaler = None
-        self.model_path = "CNNv2_Filters64-128-256-Kernels20-15-5-Swish_E500-Best.h5"
+        self.model_path = "CNNv2_Filters64-128-256-Kernels20-15-5-Swish_E500-Best.keras"
         self.scaler_path = "scaler.pkl"
 
     def load_resources(self):
         import os
         current_dir = os.path.dirname(os.path.abspath(__file__))
         
-        # 1. Load Model with compile=False to fix version mismatch
+        # Load Model with compile=False to fix version mismatch
         model_full_path = os.path.join(current_dir, self.model_path)
         if os.path.exists(model_full_path):
             try:
@@ -26,7 +26,7 @@ class TrustModelPipeline:
         else:
             print(f"FILE MISSING: Expected model at {model_full_path}")
 
-        # 2. Load Scaler
+        # Load Scaler
         scaler_full_path = os.path.join(current_dir, self.scaler_path)
         if os.path.exists(scaler_full_path):
             try:
@@ -47,29 +47,28 @@ class TrustModelPipeline:
             return 0.5
 
         try:
-            # 1. Convert to Numpy Array (Shape: 300, 6)
+            # Convert to Numpy Array (Shape: 300, 6)
             raw_data = np.array(interactions)
             
-            # Validation: Ensure we have exactly 300 interactions of 6 features
+            # Validation
             if raw_data.shape != (300, 6):
                 print(f"Shape Mismatch: Expected (300, 6), got {raw_data.shape}")
                 return 0.5
 
-            # 2. Scale the Data (Standardization)
-            scaled_data = self.scaler.transform(raw_data)
+            flattened_input = raw_data.T.reshape(1, -1) # Shape becomes (1, 1800)
 
-            # 3. Reshape for CNN (Batch, Interactions, Features) -> (1, 300, 6)
-            input_tensor = np.expand_dims(scaled_data, axis=0)
+            scaled_flat = self.scaler.transform(flattened_input)
 
-            # 4. Inference
+            # Reshape for CNN (Batch, Features, Interactions) -> (1, 6, 300)
+            reshaped_temp = scaled_flat.reshape(1, 6, 300)
+            
+            # Transpose(Batch, Interactions, Features) -> (1, 300, 6) - consistent with training format
+            input_tensor = reshaped_temp.transpose(0, 2, 1)
+
             prediction_distribution = self.model.predict(input_tensor, verbose=0)[0]
             
-            # 5. Decode Output
-            # Your model outputs 21 classes (0.00, 0.05, ... 1.00).
-            # We take the argmax (highest probability class) and map it to a score.
             predicted_class_index = np.argmax(prediction_distribution)
-            
-            # Map index 0-20 to trust score 0.0 - 1.0
+            #TODO useful metric
             trust_score = predicted_class_index / 20.0
             
             return float(trust_score)

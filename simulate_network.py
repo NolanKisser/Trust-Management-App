@@ -46,8 +46,7 @@ def main():
         device_id = f"Device-{i+1}"
         
         try:
-            # We need to collect 6 specific rows for this device.
-            # Example for Device 1 (index 0): Rows 0, 5, 10, 15, 20, 25
+            # Read rows in steps of "X" + ("n" * 5) to collect all "n" features for device "X"
             indices = [i + (f * NUM_DEVICES) for f in range(NUM_FEATURES)]
             
             # Extract these rows
