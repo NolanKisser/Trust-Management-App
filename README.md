@@ -23,7 +23,7 @@ Follow these steps to set up the project locally. You will need **two terminal w
 * numpy (pip install numpy==1.26.4)
 * pandas (pip install pandas==2.3.3)
 * scikit-learn (pip install scikit-learn==1.6.1)
-* joblib (pip install scikit-learn==1.5.2)
+* joblib (pip install joblib==1.5.2)
 * fastapi (pip install fastapi==0.128.0)
 * uvicorn (pip install uvicorn==0.39.0)
 * npm (npm install)
