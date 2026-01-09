@@ -15,8 +15,21 @@ Follow these steps to set up the project locally. You will need **two terminal w
 ### Prerequisites
 
 * Node.js (v18 or higher)
-* Python (v3.8 or higher)
+* Python (v3.9.25)
 
+### Dependancies (follow steps in backend & frontend setup)
+
+* TensorFlow v2.10.1 (pip install tensorflow==2.10.1)
+* numpy (pip install numpy==1.26.4)
+* pandas (pip install pandas==2.3.3)
+* scikit-learn (pip install scikit-learn==1.6.1)
+* joblib (pip install scikit-learn==1.5.2)
+* fastapi (pip install fastapi==0.128.0)
+* uvicorn (pip install uvicorn==0.39.0)
+* npm (npm install)
+* tailwindcss@3, postcss, autoprefixer (npm install -D tailwindcss@3 postcss autoprefixer)
+* os
+* time
 ---
 
 ### 1. Backend Setup (Terminal 1)
