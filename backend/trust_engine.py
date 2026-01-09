@@ -47,31 +47,30 @@ class TrustModelPipeline:
             return 0.5
 
         try:
-            # Convert to Numpy Array (Shape: 300, 6)
+            # Convert to Numpy Array (300, 6)
             raw_data = np.array(interactions)
-            
-            # Validation
             if raw_data.shape != (300, 6):
                 print(f"Shape Mismatch: Expected (300, 6), got {raw_data.shape}")
                 return 0.5
 
-            flattened_input = raw_data.T.reshape(1, -1) # Shape becomes (1, 1800)
-
+            flattened_input = raw_data.T.reshape(1, -1) # (1, 1800)
             scaled_flat = self.scaler.transform(flattened_input)
 
-            # Reshape for CNN (Batch, Features, Interactions) -> (1, 6, 300)
+            # Reshape for CNN (Batch, Features, Interactions) as (1, 6, 300)
             reshaped_temp = scaled_flat.reshape(1, 6, 300)
-            
-            # Transpose(Batch, Interactions, Features) -> (1, 300, 6) - consistent with training format
+            # Transpose (Batch, Interactions, Features) as (1, 300, 6) - consistent with training format
             input_tensor = reshaped_temp.transpose(0, 2, 1)
 
+            # Get CNN prediction
             prediction_distribution = self.model.predict(input_tensor, verbose=0)[0]
             
-            predicted_class_index = np.argmax(prediction_distribution)
-            #TODO useful metric
-            trust_score = predicted_class_index / 20.0
+            # Format the prediction into the standard 21 classes
+            predicted_index = np.argmax(prediction_distribution)
+            class_integer = int(predicted_index + 1)
             
-            return float(trust_score)
+            return {
+                "device_class_pred": class_integer 
+            }
 
         except Exception as e:
             print(f"Prediction Logic Error: {e}")

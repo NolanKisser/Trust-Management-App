@@ -29,8 +29,8 @@ export function DeviceTable({ devices }) {
             <tr key={device.id}>
               <td className="px-6 py-4 font-medium">{device.id}</td>
               <td className="px-6 py-4">
-                <span className={`font-bold mr-2 ${device.trustScore > 0.8 ? 'text-green-600' : device.trustScore < 0.5 ? 'text-red-600' : 'text-yellow-600'}`}>
-                  {device.trustScore}
+                <span className="font-mono text-gray-600 font-medium">
+                  {device.displayRange || "Calculating..."}
                 </span>
               </td>
               <td className="px-6 py-4">
@@ -38,7 +38,9 @@ export function DeviceTable({ devices }) {
                   {device.status}
                 </span>
               </td>
-              <td className="px-6 py-4">{device.profile}</td>
+              <td className="px-6 py-4 font-medium text-gray-600">
+                  {device.profile || "Waiting..."}
+              </td>
             </tr>
           ))}
         </tbody>

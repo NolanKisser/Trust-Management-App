@@ -25,14 +25,14 @@ app.add_middleware(
 
 # --- Database (In-Memory) ---
 db = {
-    "devices": [], # Will be populated by Auto-Discovery
+    "devices": [], # populated by Auto-Discovery
     "networkOverview": {"avgTrustScore": 0.0, "devicesAtRisk": 0, "activeGateways": 5}
 }
 
 # --- Data Models ---
 class InteractionBatch(BaseModel):
     device_id: str
-    history: List[List[float]] # Matrix of 300x6
+    history: List[List[float]] # (300x6)
 
 # --- Endpoints ---
 @app.get("/api/dashboard")
@@ -41,32 +41,50 @@ def get_dashboard_data():
 
 @app.post("/api/analyze-trust")
 def analyze_trust(data: InteractionBatch):
-    # 1. Run ML Pipeline
-    new_score = pipeline.predict_trust(data.history)
-    
-    # 2. Determine Status
+    try:
+        trust_column = [row[0] for row in data.history]
+        
+        min_val = min(trust_column)
+        max_val = max(trust_column)
+        last_val = trust_column[-1] 
+        
+        range_string = f"{min_val:.2f} - {max_val:.2f} | Last: {last_val:.2f}"
+
+        current_batch_average = sum(trust_column) / len(trust_column)
+
+    except Exception as e:
+        print(f"Error processing raw data: {e}")
+        range_string = "N/A"
+        current_batch_average = 0.0
+
+    # CNN Classification
+    result = pipeline.predict_trust(data.history)
+    class_integer = result["device_class_pred"]
+
+    # Update database
     status = "Normal"
-    if new_score < 0.5: status = "At Risk"
-    elif new_score < 0.8: status = "Warning"
+    if class_integer >= 16: status = "At Risk"
 
-    # 3. Update or Create Device
-    device = next((d for d in db["devices"] if d["id"] == data.device_id), None)
-    if device:
-        device["trustScore"] = new_score
-        device["status"] = status
+    existing_device = next((d for d in db["devices"] if d["id"] == data.device_id), None)
+    
+    device_entry = {
+        "id": data.device_id,
+        "trustScore": round(current_batch_average, 3),
+        "displayRange": range_string,
+        "status": status,
+        "profile": f"Class {class_integer}",
+        "lastSeen": "Just now"
+    }
+
+    if existing_device:
+        existing_device.update(device_entry)
     else:
-        db["devices"].append({
-            "id": data.device_id,
-            "trustScore": new_score,
-            "status": status,
-            "lastSeen": "Just now",
-            "profile": "Auto-Detected"
-        })
+        db["devices"].append(device_entry)
 
-    # 4. Update Overview Stats
-    scores = [d["trustScore"] for d in db["devices"]]
-    if scores:
-        db["networkOverview"]["avgTrustScore"] = round(sum(scores) / len(scores), 2)
+    # Average of the current device scores
+    all_device_scores = [d["trustScore"] for d in db["devices"]]
+    if all_device_scores:
+        db["networkOverview"]["avgTrustScore"] = round(sum(all_device_scores) / len(all_device_scores), 2)
     db["networkOverview"]["devicesAtRisk"] = sum(1 for d in db["devices"] if d["status"] == "At Risk")
 
-    return {"message": "Analyzed", "score": new_score, "status": status}
+    return {"message": "Analyzed", "device_class_pred": class_integer}
