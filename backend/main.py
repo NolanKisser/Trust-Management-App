@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# CORS (Allow Frontend)
+# CORS (Allow frontend requests)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -23,68 +23,72 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Database (In-Memory) ---
+# IN-MEMORY DB
 db = {
-    "devices": [], # populated by Auto-Discovery
-    "networkOverview": {"avgTrustScore": 0.0, "devicesAtRisk": 0, "activeGateways": 5}
+    "devices": [],
+    "networkOverview": {"avgTrustScore": 0.0, "devicesAtRisk": 0, "activeGateways": 0}
 }
 
-# --- Data Models ---
-class InteractionBatch(BaseModel):
+# DATA MODELS
+class DeviceInteractions(BaseModel):
     device_id: str
-    history: List[List[float]] # (300x6)
+    history: List[List[float]] #(300x6)
 
-# --- Endpoints ---
+# ENDPOINTS
 @app.get("/api/dashboard")
 def get_dashboard_data():
     return db
 
-@app.post("/api/analyze-trust")
-def analyze_trust(data: InteractionBatch):
+@app.post("/api/analyze-behaviour")
+def analyze_behaviour(data: DeviceInteractions):
     try:
         trust_column = [row[0] for row in data.history]
         
-        min_val = min(trust_column)
-        max_val = max(trust_column)
-        last_val = trust_column[-1] 
+        min_trust = min(trust_column)
+        max_trust = max(trust_column)
+        last_trust = trust_column[-1] 
         
-        range_string = f"{min_val:.2f} - {max_val:.2f} | Last: {last_val:.2f}"
-
-        current_batch_average = sum(trust_column) / len(trust_column)
+        trust_range_str = f"{min_trust:.2f} - {max_trust:.2f} | Last: {last_trust:.2f}"
+        trust_avg = sum(trust_column) / len(trust_column)
 
     except Exception as e:
-        print(f"Error processing raw data: {e}")
-        range_string = "N/A"
-        current_batch_average = 0.0
+        print(f"ERROR: {e}")
+        trust_range_str = "N/A"
+        trust_avg = 0.0
 
-    # CNN Classification
-    result = pipeline.predict_trust(data.history)
-    class_integer = result["device_class_pred"]
+    # CNN classification
+    class_int = pipeline.predict_trust(data.history)
 
-    # Update database
-    status = "Normal"
-    if class_integer >= 16: status = "At Risk"
+    if class_int <= 15: 
+        status = "Normal"
+    elif class_int >= 16:
+        status = "At Risk"
+    else:
+        status = "ERROR"
 
-    existing_device = next((d for d in db["devices"] if d["id"] == data.device_id), None)
-    
+    existing_device = next((device for device in db["devices"] if device["id"] == data.device_id), None)
     device_entry = {
         "id": data.device_id,
-        "trustScore": round(current_batch_average, 3),
-        "displayRange": range_string,
+        "trustAvg": round(trust_avg, 3),
+        "trustDisplay": trust_range_str,
         "status": status,
-        "profile": f"Class {class_integer}",
-        "lastSeen": "Just now"
+        "profile": f"Class {class_int}"
     }
 
+    # Update database
     if existing_device:
         existing_device.update(device_entry)
     else:
         db["devices"].append(device_entry)
 
-    # Average of the current device scores
-    all_device_scores = [d["trustScore"] for d in db["devices"]]
-    if all_device_scores:
-        db["networkOverview"]["avgTrustScore"] = round(sum(all_device_scores) / len(all_device_scores), 2)
-    db["networkOverview"]["devicesAtRisk"] = sum(1 for d in db["devices"] if d["status"] == "At Risk")
+    # Avg all devices avg trust
+    trust_all_device = [device["trustAvg"] for device in db["devices"]]
+    if trust_all_device:
+        db["networkOverview"]["avgTrustScore"] = round(sum(trust_all_device) / len(trust_all_device), 2)
+    db["networkOverview"]["devicesAtRisk"] = sum(1 for device in db["devices"] if device["status"] == "At Risk")
 
-    return {"message": "Analyzed", "device_class_pred": class_integer}
+    return {
+        "message": "Analyzed", 
+        "device_class_pred": class_int,
+        "status": status
+    }

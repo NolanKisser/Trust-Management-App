@@ -30,7 +30,7 @@ export function DeviceTable({ devices }) {
               <td className="px-6 py-4 font-medium">{device.id}</td>
               <td className="px-6 py-4">
                 <span className="font-mono text-gray-600 font-medium">
-                  {device.displayRange || "Calculating..."}
+                  {device.trustDisplay || "Calculating..."}
                 </span>
               </td>
               <td className="px-6 py-4">
