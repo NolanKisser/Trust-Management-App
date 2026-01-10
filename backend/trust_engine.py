@@ -53,10 +53,9 @@ class TrustModelPipeline:
                 print(f"Shape incorrect: Expected (300, 6), got {X_raw.shape}. Returning Mock.")
                 return -1.0
 
-            X_flattened_input = X_raw.T.reshape(1, -1) # (1, Interactions * Features)
-            X_scaled_flat = self.scaler.transform(X_flattened_input)
-            X_reshaped = X_scaled_flat.reshape(1, 6, 300) #(Batch, Features, Interactions)
-            X_input = X_reshaped.transpose(0, 2, 1) # (Batch, Interactions, Features)
+            # Scale and then reformat
+            X_scaled = self.scaler.transform(X_raw) # (300 rows/interactions, 6 columns/features)
+            X_input = X_scaled.reshape(1, 300, 6) #(Batch, Interactions, Features)
             
             # Get device behaviour prediction as int instead of one-hot
             prediction_distribution = self.model.predict(X_input, verbose=0)[0]
