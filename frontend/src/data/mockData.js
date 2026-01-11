@@ -15,8 +15,8 @@ export const mockData = {
     { id: 2, title: 'ON-OFF Attack Detected', device: 'Device D-102', time: '20 min ago' },
   ],
   devices: [
-    { id: 'D-101', trustScore: 0.91, status: 'Normal', lastSeen: '2s ago', profile: 'Profile 9' },
-    { id: 'D-102', trustScore: 0.43, status: 'At Risk', lastSeen: '10s ago', profile: 'Profile 21' },
-    { id: 'D-103', trustScore: 0.78, status: 'Warning', lastSeen: '4s ago', profile: 'Profile 10' },
+    { id: 'D-101', trustAvg: 0.91, status: 'Normal', lastSeen: '2s ago', profile: 'Profile 9' },
+    { id: 'D-102', trustAvg: 0.43, status: 'At Risk', lastSeen: '10s ago', profile: 'Profile 21' },
+    { id: 'D-103', trustAvg: 0.78, status: 'Warning', lastSeen: '4s ago', profile: 'Profile 10' },
   ],
 };
