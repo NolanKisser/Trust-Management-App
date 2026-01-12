@@ -7,7 +7,13 @@ export function GatewayCard({ gateway }) {
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="font-semibold text-gray-700">{gateway.name}</h3>
-          <p className="text-sm text-gray-500">{gateway.devices} Devices</p>
+          <p className="text-sm text-gray-500">{gateway.devices} Devices 
+            {gateway.atRisk > 0 && (
+              <span className="text-red-600 font-medium ml-2">
+                ({gateway.atRisk} At Risk)
+              </span>
+            )}
+          </p>
         </div>
         <span className="text-gray-400">...</span>
       </div>

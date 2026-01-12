@@ -31,9 +31,17 @@ function App() {
 
   const { networkOverview, devices } = data;
 
+  // Backend's avgTrustScore to determine the Gateway's overall health
+  const gatewayStatus = networkOverview.avgTrustScore < 0.8 ? 'Suspect' : 'OK';
+
   // Generate Dummy Gateways for UI visualization
   const gateways = [
-    { id: 'A', name: 'Gateway A', devices: devices.length, status: 'OK', score: 0.92 }
+    { id: 'A', 
+      name: 'Gateway A', 
+      devices: devices.length, 
+      atRisk: networkOverview.devicesAtRisk, 
+      status: gatewayStatus, 
+      score: networkOverview.avgTrustScore }
   ];
 
   return (

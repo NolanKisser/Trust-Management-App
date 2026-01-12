@@ -7,7 +7,7 @@ class TrustModelPipeline:
     def __init__(self):
         self.model = None
         self.scaler = None
-        self.model_path = "CNNv2_Filters64-128-256-Kernels20-15-5-Swish_E500-Best.keras"
+        self.model_path = "CNNv2_Filters64-128-256-Kernels20-15-5-Swish_E500-Best.h5"
         self.scaler_path = "scaler.pkl"
 
     def load_resources(self) -> bool:
@@ -49,7 +49,7 @@ class TrustModelPipeline:
         try:
             X_raw = np.array(interactions) #(Interactions * Features)
 
-            if X_raw.shape != (300, 6): #TODO modify if model changes
+            if X_raw.shape != (300, 6): # Modify if model changes
                 print(f"Shape incorrect: Expected (300, 6), got {X_raw.shape}. Returning Mock.")
                 return -1.0
 
