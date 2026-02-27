@@ -1,0 +1,3 @@
+Sample attribute data grouped by device, and then by attribute (Trust, SIA, NTA, NDA, SEE, SSA/SSMA, BPA, SAA)
+- 21 sample devices (15 normal, 6 attacking)
+- 8 attributes
