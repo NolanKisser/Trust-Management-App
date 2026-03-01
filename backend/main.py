@@ -56,11 +56,14 @@ def analyze_behaviour(data: DeviceInteractions):
         trust_range_str = "N/A"
         trust_avg = 0.0
 
-    # CNN classification
+    # CNN device behaviour classification
     class_int = pipeline.predict_trust(data.history)
 
     if class_int <= 15: 
-        status = "Normal"
+        if trust_avg > 0.50:
+            status = "Normal"
+        else: 
+            status = "Warning"
     elif class_int >= 16:
         status = "At Risk"
     else:

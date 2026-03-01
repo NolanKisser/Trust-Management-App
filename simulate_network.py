@@ -4,10 +4,10 @@ import time
 import numpy as np
 
 # CONFIG
-FILENAME = "Sample Data 5 devices - Sheet1.csv"
+FILENAME = "Sample Data 21 Devices - 8 Attr.csv"
 API_URL = "http://localhost:8000/api/analyze-behaviour"
-NUM_DEVICES = 5
-NUM_FEATURES = 6
+NUM_DEVICES = 21
+NUM_FEATURES = 8
 
 def main():
     print(f"Loading {FILENAME}...")
@@ -26,10 +26,12 @@ def main():
         device_id = f"Device-{current_device_index+1}"
         
         try:
-            # Read rows as desired_device_id + desired_feature_num * num_devices
-            indices = [current_device_index + (current_feature_index * NUM_DEVICES) for current_feature_index in range(NUM_FEATURES)]
-            device_features_df = simulated_devices_df.iloc[indices, :] # feature, interactions
-            device_history = device_features_df.T.values #interaction, features
+            # Device 0 gets rows 0-7, Device 1 gets rows 8-15, etc.
+            start_row = current_device_index * NUM_FEATURES
+            end_row = start_row + NUM_FEATURES
+            
+            device_features_df = simulated_devices_df.iloc[start_row:end_row, :] 
+            device_history = device_features_df.T.values
             
             # only send the last 300 interactions
             if device_history.shape[0] > 300:
