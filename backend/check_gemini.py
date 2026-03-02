@@ -3,7 +3,7 @@ from google import genai
 
 # 1. Configuration - Use your newest key here
 # Try hardcoding it first to eliminate environment variable issues
-TEST_KEY = "AIzaSyDBNc7647aOgRXtWfPWG1FuhMdnAbBIiF4" 
+TEST_KEY = "xxx" 
 
 def test_gemini_connection():
     print("--- Gemini API Connectivity Test ---")
