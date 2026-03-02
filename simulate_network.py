@@ -4,7 +4,7 @@ import time
 import numpy as np
 
 # CONFIG
-FILENAME = "Sample Data 21 Devices - 8 Attr.csv"
+FILENAME = "Trust-Management-App\Sample Data 21 Devices - 8 Attr.csv"
 API_URL = "http://localhost:8000/api/analyze-behaviour"
 NUM_DEVICES = 21
 NUM_FEATURES = 8
