@@ -221,7 +221,7 @@ def get_dashboard_data():
 def analyze_behaviour(data: DeviceInteractions):
     try:
         db["raw_histories"][data.device_id] = data.history
-        trust_column = [row[0] for row in data.history]
+        trust_column = [row[1] for row in data.history]
         trust_avg = sum(trust_column) / len(trust_column)
         trust_range_str = f"{min(trust_column):.2f} - {max(trust_column):.2f} | Last: {trust_column[-1]:.2f}"
     except Exception as e:
@@ -276,7 +276,6 @@ async def llm_analyze(request: ChatRequest):
             - Do NOT invent behavior beyond statistical evidence.​
             - Explicitly state uncertainty if evidence is limited. ​
             - EACH textual output field MUST be EXACTLY ONE sentence. ​
-            - Remember analysed device input data if user wants the raw data
             - Output MUST be valid JSON only.​
 
             PRIORITY HEURISTICS: ​
@@ -300,7 +299,28 @@ async def llm_analyze(request: ChatRequest):
                 }}​ Device to be analysed: \n{context_text}\n\n"""
         )
     else:
-        prompt = request.new_message
+        prompt =  prompt = (
+            f"""You are an IoT Device Health and Security Diagnostic Language Model. Analyze IoT device snapshots using ONLY the providedinteraction statistics and metadata, with NO predefined classes or
+            external labels. Your responsibilities are to identify issues, explainthem, and recommend actions using concise, operator-friendlylanguage.​
+
+            MANDATORY RULES: ​
+
+            Use ONLY provided input values.​
+            - Do NOT account for outliers
+            - Do NOT invent behavior beyond statistical evidence.​
+            - Explicitly state uncertainty if evidence is limited. ​
+            - EACH textual output should be be 1-2 sentences.
+            - Remember analysed device input data if user wants the raw data
+
+            PRIORITY HEURISTICS: ​
+            - Trust is an anaylytical combination of all attributes and is the main attribute to determine device safety
+            - If sensor_age > 72 months, consider sensor aging as a minor contributing factor. ​
+            - If battery power ever drops below 20%, treat power-related degradation as high priority. ​
+            - Low mean indicates baseline weakness, low min indicates worst-case risk, and high std indicates instability. ​
+            - Strong mean with sharp drops suggests intermittent degradation. ​
+            - SecurityStrengthMessageAuthentication & SecurityStrengthEncryption are represented as industry standard at 256, shown in stages as 128, 64, …, 0
+            Device Data: \n{context_text}\nQuestion to Answer: {request.new_message}\n"""
+        ) 
 
     contents = [{"role": "user" if m.role == "user" else "model", "parts": [{"text": m.parts}]} for m in request.history]
     contents.append({"role": "user", "parts": [{"text": prompt}]})

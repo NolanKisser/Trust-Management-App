@@ -1,12 +1,14 @@
+import os
 import pandas as pd
 import requests
 import time
 import numpy as np
 
 # CONFIG
-FILENAME = "Trust-Management-App\Sample Data 21 Devices - 8 Attr.csv"
+FILENAME = "Sample_Data_5_Devices.csv"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 API_URL = "http://localhost:8000/api/analyze-behaviour"
-NUM_DEVICES = 21
+NUM_DEVICES = 5
 NUM_FEATURES = 8
 
 def main():
@@ -42,7 +44,7 @@ def main():
                 "device_id": device_id,
                 "history": history
             }
-
+            print(f"Sending {device_id}...{history}")
             # Send to backend for CNN analysis
             print(f"Sending {device_id}...", end=" ")
             response = requests.post(API_URL, json=payload)
