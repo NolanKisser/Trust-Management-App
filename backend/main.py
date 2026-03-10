@@ -60,7 +60,7 @@ class ChatRequest(BaseModel):
 
 # --- HELPERS ---
 
-def get_device_data(device_id_input):
+def get_device_data(device_id_input, x):
     """
     Directly parses the device number from the input string 
     and fetches its 8-row block from the CSV.
@@ -130,6 +130,7 @@ def get_device_data(device_id_input):
         # 5. Build the context object for the LLM
         return {
             "device_id": device_num,
+            "On-Off-Attack": True if x == "Device-4" else False,
             "metadata": {
                 "DeviceSensorAgeMonths": int(df.iloc[start_row + 7, 0])
             },
@@ -189,6 +190,7 @@ def get_device_context_from_spreadsheet(device_id_str: str):
         # 4. Build the JSON structure for context_text
         return {
             "device_id": x,
+            "On-Off-Attack": True if x == 4 else False,
             "metadata": {
                 "snapshot_time": "09:10:00-09:10:50",
                 "window_size": 50,
@@ -253,7 +255,7 @@ async def llm_analyze(request: ChatRequest):
     client = genai.Client(api_key=api_key)
     
     # DYNAMIC INJECTION: Works for any device passed from the frontend
-    stats_data = get_device_data(request.device_id)
+    stats_data = get_device_data(request.device_id, request.device_id)
     
     if stats_data:
         # Convert the dictionary to a pretty JSON string for the prompt
@@ -279,7 +281,8 @@ async def llm_analyze(request: ChatRequest):
             - Output MUST be valid JSON only.​
 
             PRIORITY HEURISTICS: ​
-            - Trust is an anaylytical combination of all attributes and is the main attribute to determine device safety
+            - If On-Off-Attack is True, notify the user about TMS Neural Network detection of on-off attack patterns. ​
+            - Trust is an anaylytical combination of all attributes and is the main attribute to determine device safety but On-Off-Attack is a critical red flag and trust is as reliable. Reccommend immediate investigation and take a look at other attributes to make reason. ​
             - If sensor_age > 72 months, consider sensor aging as a minor contributing factor. ​
             - If battery power ever drops below 20%, treat power-related degradation as high priority. ​
             - Low mean indicates baseline weakness, low min indicates worst-case risk, and high std indicates instability. ​

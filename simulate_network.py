@@ -8,7 +8,7 @@ import numpy as np
 FILENAME = "Sample_Data_5_Devices.csv"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 API_URL = "http://localhost:8000/api/analyze-behaviour"
-NUM_DEVICES = 5
+NUM_DEVICES = 4
 NUM_FEATURES = 8
 
 def main():
@@ -44,7 +44,6 @@ def main():
                 "device_id": device_id,
                 "history": history
             }
-            print(f"Sending {device_id}...{history}")
             # Send to backend for CNN analysis
             print(f"Sending {device_id}...", end=" ")
             response = requests.post(API_URL, json=payload)
