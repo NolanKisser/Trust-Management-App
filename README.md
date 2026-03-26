@@ -15,7 +15,7 @@ Follow these steps to set up the project locally. You will need **two terminal w
 ### Prerequisites
 
 - Node.js (v18 or higher)
-- Python (v3.9.25)
+- Python (v3.9.25) 
 
 ### Dependancies (follow steps in backend & frontend setup)
 
