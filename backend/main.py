@@ -15,6 +15,7 @@ from trust_engine import TrustModelPipeline
 
 # Initialize Pipeline
 pipeline = TrustModelPipeline()
+AI_ENGINE_MODEL = "gemini-3.1-pro-preview"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -216,7 +217,8 @@ def get_device_context_from_spreadsheet(device_id_str: str):
 def get_dashboard_data():
     return {
         "devices": db["devices"],
-        "networkOverview": db["networkOverview"]
+        "networkOverview": db["networkOverview"],
+        "aiEngineModel": AI_ENGINE_MODEL
     }
 
 @app.post("/api/analyze-behaviour")
@@ -225,7 +227,7 @@ def analyze_behaviour(data: DeviceInteractions):
         db["raw_histories"][data.device_id] = data.history
         trust_column = [row[1] for row in data.history]
         trust_avg = sum(trust_column) / len(trust_column)
-        trust_range_str = f"{min(trust_column):.2f} - {max(trust_column):.2f} | Last: {trust_column[-1]:.2f}"
+        trust_range_str = f"{min(trust_column):.2f} - {max(trust_column):.2f} | Current: {trust_column[-1]:.2f}"
     except Exception as e:
         trust_avg, trust_range_str = 0.0, "N/A"
 
@@ -329,7 +331,7 @@ async def llm_analyze(request: ChatRequest):
     contents.append({"role": "user", "parts": [{"text": prompt}]})
 
     try:
-        response = client.models.generate_content(model="gemini-3.1-pro-preview", contents=contents)
+        response = client.models.generate_content(model=AI_ENGINE_MODEL, contents=contents)
         return {
             "response": response.text,
             "history": request.history + [{"role": "user", "parts": prompt}, {"role": "model", "parts": response.text}]
