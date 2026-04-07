@@ -1,3 +1,26 @@
+.app-bg-light {
+  background:
+    radial-gradient(1200px 500px at 10% -20%, rgba(59, 130, 246, 0.14), transparent),
+    radial-gradient(900px 400px at 100% 0%, rgba(14, 165, 233, 0.12), transparent),
+    #f3f6fb;
+}
+
+.app-bg-dark {
+  background:
+    radial-gradient(1100px 450px at 0% -10%, rgba(59, 130, 246, 0.2), transparent),
+    radial-gradient(800px 400px at 100% 0%, rgba(14, 165, 233, 0.15), transparent),
+    #020617;
+}
+
+.glass-card-light {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.glass-card-dark {
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(8px);
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

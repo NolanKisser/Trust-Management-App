@@ -6,6 +6,7 @@ import { StatCard } from './components/StatCard';
 import { Alerts } from './components/Alerts';
 import { DeviceTable } from './components/DeviceTable'; 
 import LLMAnalysis from './components/LLMAnalysis'; // 1. Added Import
+import { TrustTimeline } from './components/TrustTimeline';
 
 function App() {
   const [data, setData] = useState(null);
@@ -97,12 +98,16 @@ function App() {
           </div>
         );
 
+      case 'trust-timeline':
+        return <TrustTimeline devices={devices} darkMode={darkMode} />;
+
       case 'dashboard':
       default:
         return (
           <>
             <div className="mb-6">
-              <h2 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Network Overview</h2>
+              <h2 className={`text-2xl font-semibold mb-1 tracking-tight ${darkMode ? 'text-slate-100' : 'text-gray-900'}`}>Network Overview</h2>
+              <p className={`${darkMode ? 'text-slate-400' : 'text-gray-600'} mb-4`}>Live trust intelligence for connected IoT devices.</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <StatCard icon="🛡️" title="Avg Trust Score" value={networkOverview.avgTrustScore} type="success" darkMode={darkMode} />
                 <StatCard icon="⚠️" title="Devices at Risk" value={networkOverview.devicesAtRisk} type="warning" darkMode={darkMode} />
@@ -116,8 +121,8 @@ function App() {
               </div>
               
               <div className="space-y-6">
-                 <div className={`p-4 rounded shadow-sm border ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
-                   <h3 className={`font-bold ${darkMode ? 'text-slate-100' : 'text-gray-700'}`}>System Status</h3>
+                 <div className={`p-5 rounded-xl shadow-sm border ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+                   <h3 className={`font-bold ${darkMode ? 'text-slate-100' : 'text-gray-700'}`}>Live System Feed</h3>
                    <p className={`text-sm mt-2 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Listening for network traffic...</p>
                    <div className={`mt-4 text-xs font-mono opacity-80 ${darkMode ? 'text-slate-500' : 'text-gray-400'}`}>
                       {devices.map(d => (
@@ -135,7 +140,7 @@ function App() {
   };
 
   return (
-    <div className={`flex h-screen overflow-hidden ${darkMode ? 'bg-slate-950' : 'bg-gray-100'}`}>
+    <div className={`flex h-screen overflow-hidden ${darkMode ? 'app-bg-dark bg-slate-950' : 'app-bg-light bg-gray-100'}`}>
       <Sidebar 
         onNavigate={setCurrentView} 
         currentView={currentView} 
@@ -147,7 +152,7 @@ function App() {
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Navbar darkMode={darkMode} />
-        <main className={`flex-1 overflow-x-hidden overflow-y-auto p-6 ${darkMode ? 'bg-slate-950' : 'bg-gray-100'}`}>
+        <main className={`flex-1 overflow-x-hidden overflow-y-auto p-6 ${darkMode ? 'bg-slate-950/35' : 'bg-transparent'}`}>
           {renderContent()}
         </main>
       </div>

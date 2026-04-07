@@ -24,7 +24,9 @@ const parseTrustDisplay = (trustDisplay) => {
 
 export function DeviceTable({ devices, onDeviceClick, darkMode }) {
   const [fluctuatingCurrentByDevice, setFluctuatingCurrentByDevice] = useState({});
+  const [sortBy, setSortBy] = useState('class');
   const [classSortDirection, setClassSortDirection] = useState('asc');
+  const [nameSortDirection, setNameSortDirection] = useState('asc');
 
   useEffect(() => {
     setFluctuatingCurrentByDevice((previous) => {
@@ -107,30 +109,63 @@ export function DeviceTable({ devices, onDeviceClick, darkMode }) {
     return Number(match[1]);
   };
 
+  const compareDeviceId = (a, b) =>
+    a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' });
+
   const sortedDevices = useMemo(() => {
+    const list = [...devices];
+    if (sortBy === 'name') {
+      const dir = nameSortDirection === 'asc' ? 1 : -1;
+      return list.sort((a, b) => {
+        const nameDiff = compareDeviceId(a, b) * dir;
+        if (nameDiff !== 0) return nameDiff;
+        return getClassRank(a.profile) - getClassRank(b.profile);
+      });
+    }
     const direction = classSortDirection === 'asc' ? 1 : -1;
-    return [...devices].sort((a, b) => {
+    return list.sort((a, b) => {
       const classDiff = (getClassRank(a.profile) - getClassRank(b.profile)) * direction;
       if (classDiff !== 0) return classDiff;
-      return a.id.localeCompare(b.id);
+      return compareDeviceId(a, b);
     });
-  }, [devices, classSortDirection]);
+  }, [devices, sortBy, classSortDirection, nameSortDirection]);
 
   const toggleClassSort = () => {
+    setSortBy('class');
     setClassSortDirection((previous) => (previous === 'asc' ? 'desc' : 'asc'));
   };
 
+  const toggleNameSort = () => {
+    setSortBy('name');
+    setNameSortDirection((previous) => (previous === 'asc' ? 'desc' : 'asc'));
+  };
+
   return (
-    <div className={`rounded-lg shadow-sm overflow-hidden border ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+    <div className={`rounded-xl shadow-sm overflow-hidden border ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
       <div className={`px-6 py-4 border-b flex justify-between items-center ${darkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-        <h2 className={`font-semibold text-lg ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Connected Devices</h2>
-        <span className={`text-xs font-mono ${darkMode ? 'text-slate-400' : 'text-gray-400'}`}>Real-time update active</span>
+        <div>
+          <h2 className={`font-semibold text-lg ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Connected Devices</h2>
+          <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Click a device for AI analysis</p>
+        </div>
+        <span className={`text-xs font-mono px-2.5 py-1 rounded-full ${darkMode ? 'text-emerald-200 bg-emerald-900/30' : 'text-emerald-700 bg-emerald-50'}`}>Real-time active</span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead className={`${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-gray-50 text-gray-600'} text-xs uppercase font-bold tracking-wider`}>
             <tr>
-              <th className="px-6 py-4">Device ID</th>
+              <th className="px-6 py-4">
+                <button
+                  type="button"
+                  onClick={toggleNameSort}
+                  className={`inline-flex items-center gap-1 transition-colors ${darkMode ? 'hover:text-white' : 'hover:text-gray-900'}`}
+                  title={`Sort by device name (${nameSortDirection === 'asc' ? 'A–Z' : 'Z–A'})`}
+                >
+                  Device ID
+                  {sortBy === 'name' ? (
+                    <span aria-hidden="true">{nameSortDirection === 'asc' ? '↑' : '↓'}</span>
+                  ) : null}
+                </button>
+              </th>
               <th className="px-6 py-4">Trust Score</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4">
@@ -141,7 +176,9 @@ export function DeviceTable({ devices, onDeviceClick, darkMode }) {
                   title={`Sort by class (${classSortDirection === 'asc' ? 'ascending' : 'descending'})`}
                 >
                   Profile / Classification
-                  <span aria-hidden="true">{classSortDirection === 'asc' ? '↑' : '↓'}</span>
+                  {sortBy === 'class' ? (
+                    <span aria-hidden="true">{classSortDirection === 'asc' ? '↑' : '↓'}</span>
+                  ) : null}
                 </button>
               </th>
               <th className="px-6 py-4 text-right">Actions</th>

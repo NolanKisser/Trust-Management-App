@@ -9,15 +9,16 @@ const LLMAnalysis = ({ selectedDevice, darkMode }) => {
    * Helper function to clean the AI output.
    * If it's JSON, it renders a list. If it's text, it strips the quotes.
    */
-  const formatAIResponse = (text) => {
-    // 1. Remove triple quotes or markdown code blocks
+  /** Only the first model message is the structured JSON diagnostic; follow-ups render as prose. */
+  const formatAIResponse = (text, useStructuredJson) => {
     const cleanText = text.replace(/"""/g, "").replace(/```json/g, "").replace(/```/g, "").trim();
 
+    if (!useStructuredJson) {
+      return <div className="whitespace-pre-wrap">{cleanText}</div>;
+    }
+
     try {
-      // 2. Try to parse as JSON
       const parsed = JSON.parse(cleanText);
-      
-      // 3. If successful, render a structured list
       return (
         <div className="space-y-2">
           {Object.entries(parsed).map(([key, value]) => (
@@ -33,7 +34,6 @@ const LLMAnalysis = ({ selectedDevice, darkMode }) => {
         </div>
       );
     } catch (e) {
-      // 4. If not JSON, just return the text (with quotes removed)
       return <div className="whitespace-pre-wrap">{cleanText}</div>;
     }
   };
@@ -132,7 +132,10 @@ const LLMAnalysis = ({ selectedDevice, darkMode }) => {
             </button>
           </div>
         ) : (
-          messages.map((m, i) => (
+          messages.map((m, i) => {
+            const firstModelIndex = messages.findIndex((msg) => msg.role === 'model');
+            const isFirstModelMessage = m.role === 'model' && i === firstModelIndex;
+            return (
             <div 
               key={i} 
               className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -156,11 +159,12 @@ const LLMAnalysis = ({ selectedDevice, darkMode }) => {
                 
                 {/* 5. Dynamically format the content */}
                 <div className="leading-relaxed">
-                  {m.role === 'user' ? m.parts : formatAIResponse(m.parts)}
+                  {m.role === 'user' ? m.parts : formatAIResponse(m.parts, isFirstModelMessage)}
                 </div>
               </div>
             </div>
-          ))
+            );
+          })
         )}
         {loading && messages.length > 0 && (
           <div className={`flex items-center space-x-2 text-xs italic animate-pulse ${darkMode ? 'text-blue-300' : 'text-blue-400'}`}>

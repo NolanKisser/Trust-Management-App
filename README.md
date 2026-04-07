@@ -33,7 +33,8 @@ Follow these steps to set up the project locally. You will need **two terminal w
 
 ---
 
-### Backend Setup (Terminal 1)
+### Backend Setup (Terminal 1) FOLLOW INSTRUCTIONS OR JUST RUN ./backend/setup_backend.ps1
+### ENSURE YOU ADD YOUR API KEY FOR GEMINI
 
 Navigate to the backend directory, set up the Python environment, and start the API server.
 

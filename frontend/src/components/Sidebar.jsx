@@ -2,22 +2,29 @@ import React from "react";
 
 export function Sidebar({ onNavigate, currentView, atRiskCount, warningCount, darkMode, onToggleDarkMode, aiEngineModel }) {
   // Tailwind classes used in the sidebar tabs
-  const baseNavClasses = "w-full flex items-center px-4 py-2 rounded-md transition-colors duration-200 text-left";
+  const baseNavClasses = "w-full flex items-center px-4 py-2.5 rounded-lg transition-all duration-200 text-left border";
   const getNavActiveClasses = (view) => {
     if (darkMode) {
-      return currentView === view ? "bg-slate-800 text-slate-100 ring-1 ring-slate-600" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100";
+      return currentView === view
+        ? "bg-blue-900/40 text-blue-100 border-blue-700 shadow-sm"
+        : "text-slate-300 border-transparent hover:bg-slate-800 hover:text-slate-100";
     }
-    return currentView === view ? "bg-gray-200 text-gray-900" : "text-gray-700 hover:bg-gray-100 hover:text-gray-900";
+    return currentView === view
+      ? "bg-blue-50 text-blue-700 border-blue-200 shadow-sm"
+      : "text-gray-700 border-transparent hover:bg-gray-100 hover:text-gray-900";
   };
 
   return (
-    <div className={`w-64 flex flex-col h-full transition-colors ${darkMode ? "bg-slate-900 text-white" : "bg-white text-gray-900 border-r border-gray-200"}`}>
-      <div className={`h-16 flex items-center pl-6 text-xl font-semibold ${darkMode ? "border-b border-slate-700" : "border-b border-gray-200"}`}>
-        <span className="text-blue-400 mr-2">🛡️</span>
-        <span>TMS</span>
+    <div className={`w-72 flex flex-col h-full transition-colors ${darkMode ? "bg-slate-900 text-white border-r border-slate-700" : "bg-white text-gray-900 border-r border-gray-200"}`}>
+      <div className={`h-20 flex items-center px-6 ${darkMode ? "border-b border-slate-700" : "border-b border-gray-200"}`}>
+        <span className="text-blue-400 mr-2 text-2xl">🛡️</span>
+        <div>
+          <span className="text-lg font-semibold tracking-tight">TMS</span>
+          <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Intelligent Network Monitoring</p>
+        </div>
       </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-2">
+      <nav className="flex-1 px-4 py-6 space-y-2.5">
         <button 
           type="button" 
           onClick={() => onNavigate("dashboard")} 
@@ -59,6 +66,15 @@ export function Sidebar({ onNavigate, currentView, atRiskCount, warningCount, da
         >
           <span className="mr-3">🧠</span>
           LLM Analysis
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate("trust-timeline")}
+          className={`${baseNavClasses} ${getNavActiveClasses("trust-timeline")}`}
+        >
+          <span className="mr-3">📈</span>
+          Trust Timeline
         </button>
       </nav>
 
